@@ -6,7 +6,6 @@ def parse_input_file():
     
 def check_report(report: List[int]):
     increasing: bool = None
-    num_unsafe_reports: int = 0
 
     for i in range(1, len(report)):
         # establish the direction of the report
@@ -28,6 +27,37 @@ def check_report(report: List[int]):
         ):
             return 0
         
+    return 1
+
+def check_report_dampener(report: List[int]):
+    """
+    This function tests the report, but with the "problem dampener" enabled.
+    The problem dampener is capable of tossing out one bad state.
+    """
+    dampened: bool = False  # Have we used the dampener yet?
+    increasing: bool = None  # What direction are the numbers going?
+    # Instead of just stepping through, we need two pointers.
+    start: int = 0
+    end: int = 1
+    while end < len(report):
+        unsafe: bool = False
+        difference: int = report[end] - report[start]
+        if 0 < abs(difference) <=3:
+            if increasing is None:
+                increasing = difference > 0
+            elif (increasing and difference < 0) or (not increasing and difference > 0):
+                # Then we were going the wrong direction
+                unsafe = True
+        else:
+            unsafe = True
+       
+        if dampened and unsafe:
+            return 0
+        elif unsafe:
+            dampened = True
+        elif not unsafe:
+            start += 1
+        end += 1
     return 1
             
 
