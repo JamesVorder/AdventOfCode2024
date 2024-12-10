@@ -11,8 +11,11 @@ def sd(dd):
 
 
 def test_sparse_disk_creation(sd):
-    assert str(sd) == "0..111....22222"
+    assert str(sd) == "0..111....22222"  # 132
 
 def test_defrag(sd):
     sd.defrag()
     assert str(sd) == "022111222......"
+
+def test_checksum(sd):
+    assert sd.get_checksum() == 132  # Note: this is before defragging, but calculation is the same

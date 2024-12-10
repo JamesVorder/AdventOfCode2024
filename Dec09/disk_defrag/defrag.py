@@ -64,6 +64,20 @@ class SparseDisk:
             right -= 1
 
 
+    def get_checksum(self) -> int:
+        """
+        To calculate the checksum, add up the result of 
+        multiplying each of these blocks' position with the file ID number it contains. 
+        The leftmost block is in position 0. 
+        If a block contains free space, skip it instead.
+        """
+        checksum: int = 0
+        for i, block in enumerate(self):
+            if block != ".":
+                checksum += i * int(block)
+        return checksum
+
+
     @classmethod
     def from_dense_disk(cls, dd: "DenseDisk") -> "SparseDisk":
         """
@@ -93,6 +107,7 @@ def run(filename: str):
     sd = SparseDisk.from_dense_disk(d)
     sd.defrag()
     checksum = sd.get_checksum()
+    print(f"The resulting checksum is {checksum}")
     
 
 
