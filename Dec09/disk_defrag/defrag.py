@@ -12,7 +12,7 @@ class DenseDisk:
     def __len__(self) -> int:
         return len(self.dense_map)
 
-    def __get_item__(self, idx: int) -> str:
+    def __getitem__(self, idx: int) -> str:
         return self.dense_map[idx]
     
 
@@ -25,17 +25,44 @@ class SparseDisk:
         Give the string representation of sparse format of this disk.
         i.e. 0...111.2222
         """
-        result: str = ""
-        for b in self.blocks:
-            for c in b:
-                result += str(c)
-        return result
+        return "".join(self.blocks)
+    
+    def __iter__(self):
+        return iter(self.blocks)
+    
+    def __getitem__(self, key) -> str:
+        return self.blocks[key]
+    
+    def __setitem__(self, key, value) -> None:
+        self.blocks[key] = value
+
+    def __len__(self) -> int:
+        return len(self.blocks)
     
     def append_file(self, id: int, length: int) -> None:
-        self.blocks.append([str(id)]*length)
+        for x in [str(id)]*length:
+            self.blocks.append(x)
     
     def append_freespace(self, length: int) -> None:
-        self.blocks.append(["."]*length)
+        for dot in ["."]*length:
+            self.blocks.append(dot)
+
+    def defrag(self) -> None:
+        """
+        This method shifts all blocks from right to left into empty slots
+        i.e. 0...1234.5 --> 05..1234.. --> 054.123... --> 054312....
+        Property: number of empty slots the same
+        """
+        right, left = (len(self.blocks) - 1, 0)
+        while right > left:
+            while self[left] != ".":
+                left += 1
+            while self[right] == ".":
+                right -= 1
+            self[left], self[right] = self[right], self[left]
+            left += 1
+            right -= 1
+
 
     @classmethod
     def from_dense_disk(cls, dd: "DenseDisk") -> "SparseDisk":
@@ -64,6 +91,8 @@ def run(filename: str):
     with open(filename, 'r') as f:
         d = DenseDisk(f.read())
     sd = SparseDisk.from_dense_disk(d)
+    sd.defrag()
+    checksum = sd.get_checksum()
     
 
 
